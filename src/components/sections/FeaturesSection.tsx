@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { gsap, ScrollTrigger } from '@/lib/gsap'
+import { useHeaderSection } from "@/hooks/useHeaderSection";
 
 interface Feature {
   id: number
@@ -33,6 +34,7 @@ const features: Feature[] = [
 
 export default function FeaturesSection() {
   const sectionRef = useRef<HTMLElement>(null)
+  useHeaderSection(sectionRef, 'white')
   const cardsRef = useRef<HTMLDivElement[]>([])
 
   useEffect(() => {
@@ -59,9 +61,9 @@ export default function FeaturesSection() {
   return (
     <section
       ref={sectionRef}
-      className="bg-white py-32"
+      className="bg-white relative h-screen overflow-hidden py-32 m-auto"
     >
-      <div className="mx-auto max-w-6xl px-6">
+      <div className="m-auto max-w-6xl px-6">
         <h2 className="mb-4 text-center text-sm font-medium tracking-[0.3em] text-neutral-400 uppercase">
           Features
         </h2>

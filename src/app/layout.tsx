@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import SmoothScrollProvider from '@/components/SmoothScrollProvider'
+import { HeaderProvider } from '@/contexts/HeaderContext'
+import Header from '@/components/layout/Header'
 
 export const metadata: Metadata = {
   title: 'Nailtoctoc',
@@ -15,9 +17,12 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
-        <SmoothScrollProvider>
-          {children}
-        </SmoothScrollProvider>
+        <HeaderProvider>
+          <Header />
+          <SmoothScrollProvider>
+            {children}
+          </SmoothScrollProvider>
+        </HeaderProvider>
       </body>
     </html>
   )
