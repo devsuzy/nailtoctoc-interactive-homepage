@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { getLenis } from '@/lib/lenis'
 
 const lines = ['쉽고, 빠르게', '5분만에 완성되는', '네일아트 프린트']
 
@@ -11,10 +12,24 @@ interface Take1Props {
   onComplete: () => void
 }
 
-export default function Take1({ onComplete }: Take1Props) {
+export default function IntroTake1({ onComplete }: Take1Props) {
   useEffect(() => {
+    const lenis = getLenis()
+    lenis?.stop()
+
+    const prevent = (e: Event) => e.preventDefault()
+    document.documentElement.style.overflow = 'hidden'
+    window.addEventListener('wheel', prevent, { passive: false })
+    window.addEventListener('touchmove', prevent, { passive: false })
+
     const timer = setTimeout(() => onComplete(), 2450)
-    return () => clearTimeout(timer)
+    return () => {
+      clearTimeout(timer)
+      document.documentElement.style.overflow = ''
+      window.removeEventListener('wheel', prevent)
+      window.removeEventListener('touchmove', prevent)
+      lenis?.start()
+    }
   }, [onComplete])
 
   return (

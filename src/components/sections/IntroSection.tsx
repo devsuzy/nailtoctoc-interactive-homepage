@@ -2,8 +2,8 @@
 
 import { useState, useCallback } from 'react'
 import { AnimatePresence } from 'framer-motion'
-import Take1 from './intro/Take1'
-import Take2 from './intro/Take2'
+import IntroTake1 from './intro/IntroTake1'
+import IntroTake2 from './intro/IntroTake2'
 import { useHeader } from '@/contexts/HeaderContext'
 
 export default function IntroSection() {
@@ -20,9 +20,9 @@ export default function IntroSection() {
   return (
     <>
       <AnimatePresence>
-        {showTake1 && <Take1 onComplete={handleTake1Complete} />}
+        {showTake1 && <IntroTake1 onComplete={handleTake1Complete} />}
       </AnimatePresence>
-      <Take2 started={take2Started} />
+      <IntroTake2 started={take2Started} />
     </>
   )
 }

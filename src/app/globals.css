@@ -54,3 +54,15 @@ html.lenis body {
 .lenis.lenis-smooth iframe {
   pointer-events: none;
 }
+
+/* scroll snap */
+/*.container {*/
+/*    height: 100vh;*/
+/*    overflow-y: scroll;*/
+/*    scroll-snap-type: y mandatory;*/
+/*}*/
+
+/*section[data-snap-section="true"] {*/
+/*  height: 100vh;*/
+/*  scroll-snap-align: start;*/
+/*}*/

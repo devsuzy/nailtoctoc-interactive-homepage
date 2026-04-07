@@ -1,6 +1,7 @@
 'use client'
 
 import { useLenis } from '@/hooks/useLenis'
+import { useScrollSnap } from '@/hooks/useScrollSnap'
 
 export default function SmoothScrollProvider({
   children,
@@ -8,5 +9,6 @@ export default function SmoothScrollProvider({
   children: React.ReactNode
 }) {
   useLenis()
+  useScrollSnap()
   return <>{children}</>
 }

@@ -16,7 +16,7 @@ interface Take2Props {
   started: boolean
 }
 
-export default function Take2({ started }: Take2Props) {
+export default function IntroTake2({ started }: Take2Props) {
   const sectionRef = useRef<HTMLElement>(null)
   useHeaderSection(sectionRef, 'transparent')
   const [activeFrame, setActiveFrame] = useState(0)
@@ -32,7 +32,7 @@ export default function Take2({ started }: Take2Props) {
   }, [started])
 
   return (
-    <section ref={sectionRef} className="relative h-screen overflow-hidden">
+    <section ref={sectionRef} data-snap-section className="relative h-screen overflow-hidden">
       {frames.map((frame, i) => (
         <div
           key={i}
