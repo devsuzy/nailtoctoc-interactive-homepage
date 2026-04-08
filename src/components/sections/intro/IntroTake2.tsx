@@ -48,7 +48,7 @@ export default function IntroTake2({ started }: Take2Props) {
             sizes="100vw"
             priority={i === 0}
           />
-          <div className="absolute inset-0 bg-black/20" />
+          <div className="absolute inset-0 bg-foreground/30" />
           <div className="absolute inset-0 flex items-center justify-center">
             <p className="text-center text-[2rem] font-bold text-white drop-shadow-lg md:text-6xl xl:text-7xl">
               {frame.text}

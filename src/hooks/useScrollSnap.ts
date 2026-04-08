@@ -3,14 +3,18 @@
 import { useEffect, useRef } from 'react'
 import { getLenis } from '@/lib/lenis'
 
+// FeaturesSection에서 스냅 애니메이션 진행 여부를 확인하기 위한 공유 잠금
+export const snapLock = { active: false }
+
 export function useScrollSnap() {
-  const cooldownRef = useRef(false)
+  const isScrollingRef = useRef(false)
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      // 쿨다운 중엔 스크롤 차단
-      if (cooldownRef.current) {
+      // 스냅 애니메이션 진행 중 → 모든 스크롤 완전 차단 (Lenis 포함)
+      if (isScrollingRef.current) {
         e.preventDefault()
+        e.stopImmediatePropagation()
         return
       }
 
@@ -35,28 +39,49 @@ export function useScrollSnap() {
 
       const targetIndex = Math.max(0, Math.min(sections.length - 1, currentIndex + direction))
 
-      if (targetIndex === currentIndex) return
-
-      e.preventDefault()
-
-      const lenis = getLenis()
-      const targetTop =
-        sections[targetIndex].getBoundingClientRect().top + scrollY
-
-      cooldownRef.current = true
-
-      if (lenis) {
-        lenis.scrollTo(targetTop, { duration: 1.2 })
-      } else {
-        window.scrollTo({ top: targetTop, behavior: 'smooth' })
+      // 경계에서 더 이상 이동 불가 → 자유 스크롤 차단
+      if (targetIndex === currentIndex) {
+        e.preventDefault()
+        e.stopImmediatePropagation()
+        return
       }
 
-      setTimeout(() => {
-        cooldownRef.current = false
-      }, 1400)
+      e.preventDefault()
+      e.stopImmediatePropagation()
+
+      const lenis = getLenis()
+      const targetTop = sections[targetIndex].getBoundingClientRect().top + scrollY
+
+      isScrollingRef.current = true
+      snapLock.active = true
+
+      const unlock = () => {
+        isScrollingRef.current = false
+        snapLock.active = false
+      }
+
+      // 안전 타임아웃 (onComplete 미호출 대비)
+      const safetyTimer = setTimeout(unlock, 1600)
+
+      if (lenis) {
+        lenis.scrollTo(targetTop, {
+          duration: 1.2,
+          onComplete: () => {
+            clearTimeout(safetyTimer)
+            unlock()
+          },
+        })
+      } else {
+        window.scrollTo({ top: targetTop, behavior: 'smooth' })
+        setTimeout(() => {
+          clearTimeout(safetyTimer)
+          unlock()
+        }, 1200)
+      }
     }
 
-    window.addEventListener('wheel', handleWheel, { passive: false })
-    return () => window.removeEventListener('wheel', handleWheel)
+    // capture: true → FeaturesSection(capture, 먼저 등록) 이후, Lenis(bubble) 이전에 실행
+    window.addEventListener('wheel', handleWheel, { passive: false, capture: true })
+    return () => window.removeEventListener('wheel', handleWheel, true)
   }, [])
 }

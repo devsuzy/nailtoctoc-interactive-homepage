@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { gsap } from '@/lib/gsap'
 import { useHeaderSection } from '@/hooks/useHeaderSection'
+import { snapLock } from '@/hooks/useScrollSnap'
 
 const imageConfigs = [
   {
@@ -59,15 +60,14 @@ const features = [
   },
 ]
 
-// 타임라인 단계별 시간 기준점 (초)
 // Step 0 (0s)        : 이미지 화면 밖
-// Step 1 (1.2s)      : 이미지 화면 안 (대기)
-// Step 2 (2.0s)      : 피처 1 표시
-// Step 3 (2.6s)      : 피처 2 표시
+// Step 1 (2.0s)      : 이미지 화면 안 (대기)
+// Step 2 (3.0s)      : 피처 1 표시
+// Step 3 (3.6s)      : 피처 2 표시
 // Step 4 (totalDur)  : 피처 3 표시
-const STEP_1_TIME = 1.2
-const STEP_2_TIME = 2.0
-const STEP_3_TIME = 2.6
+const STEP_1_TIME = 2.0
+const STEP_2_TIME = 3.0
+const STEP_3_TIME = 3.6
 
 export default function FeaturesSection() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -96,37 +96,37 @@ export default function FeaturesSection() {
 
     const tl = gsap.timeline({ paused: true })
 
-    // Phase 1: 이미지 진입 (0 → ~1.0s)
+    // Phase 1: 이미지 진입 (0 → ~1.7s)
     imageConfigs.forEach((_, i) => {
       tl.to(
         imgRefs.current[i],
-        { x: 0, y: 0, duration: 0.65, ease: 'power3.out' },
-        i * 0.07,
+        { x: 0, y: 0, duration: 1.2, ease: 'power3.out' },
+        i * 0.1,
       )
     })
-    // STEP_1_TIME = 1.2s (홀드 포인트)
+    // STEP_1_TIME = 2.0s (홀드 포인트)
 
     // Phase 2: 이미지 퇴장 + 텍스트 페이드 + 컨테이너 등장
     imageConfigs.forEach((config, i) => {
       tl.to(
         imgRefs.current[i],
-        { x: config.initX, y: config.initY, duration: 0.5, ease: 'power2.in' },
-        STEP_1_TIME + i * 0.04,
+        { x: config.initX, y: config.initY, duration: 1.0, ease: 'power2.in' },
+        STEP_1_TIME + i * 0.08,
       )
     })
-    tl.to(textRef.current, { opacity: 0, duration: 0.2, ease: 'power2.in' }, STEP_1_TIME)
-    // 컨테이너: 1.6s~2.0s → STEP_2_TIME에 완전히 표시
+    tl.to(textRef.current, { opacity: 0, duration: 0.3, ease: 'power2.in' }, STEP_1_TIME)
+    // 컨테이너: STEP_1_TIME + 0.4 ~ STEP_2_TIME에 완전히 표시 (이미지 뒤를 덮음)
     tl.to(take2Ref.current, { autoAlpha: 1, duration: 0.4, ease: 'power2.out' }, STEP_1_TIME + 0.4)
     // STEP_2_TIME = 2.0s (피처 1 표시 포인트)
 
     // 피처 1 → 2 크로스페이드 (2.2s~2.6s)
-    tl.to(featureRefs.current[0], { autoAlpha: 0, duration: 0.4, ease: 'power2.inOut' }, STEP_2_TIME + 0.2)
-    tl.to(featureRefs.current[1], { autoAlpha: 1, duration: 0.4, ease: 'power2.inOut' }, STEP_2_TIME + 0.2)
+    tl.to(featureRefs.current[0], { autoAlpha: 0, duration: 0.2, ease: 'power2.inOut' }, STEP_2_TIME + 0.2)
+    tl.to(featureRefs.current[1], { autoAlpha: 1, duration: 0.2, ease: 'power2.inOut' }, STEP_2_TIME + 0.2)
     // STEP_3_TIME = 2.6s (피처 2 표시 포인트)
 
     // 피처 2 → 3 크로스페이드 (2.8s~3.2s)
-    tl.to(featureRefs.current[1], { autoAlpha: 0, duration: 0.4, ease: 'power2.inOut' }, STEP_3_TIME + 0.2)
-    tl.to(featureRefs.current[2], { autoAlpha: 1, duration: 0.4, ease: 'power2.inOut' }, STEP_3_TIME + 0.2)
+    tl.to(featureRefs.current[1], { autoAlpha: 0, duration: 0.2, ease: 'power2.inOut' }, STEP_3_TIME + 0.2)
+    tl.to(featureRefs.current[2], { autoAlpha: 1, duration: 0.2, ease: 'power2.inOut' }, STEP_3_TIME + 0.2)
     // totalDuration ≈ 3.6s (피처 3 표시 포인트)
 
     stepTimesRef.current = [0, STEP_1_TIME, STEP_2_TIME, STEP_3_TIME, tl.totalDuration()]
@@ -144,7 +144,7 @@ export default function FeaturesSection() {
     stepRef.current = newStep
 
     tl.tweenTo(stepTimesRef.current[newStep], {
-      duration: 0.8,
+      duration: 1.0,
       ease: 'power3.out',
       onComplete: () => {
         isAnimatingRef.current = false
@@ -155,8 +155,11 @@ export default function FeaturesSection() {
   // 스크롤 이벤트 캡처
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
+      // 섹션 스냅 애니메이션 진행 중이면 처리하지 않음
+      if (snapLock.active) return
+
       const rect = sectionRef.current?.getBoundingClientRect()
-      const isInView = rect && Math.abs(rect.top) < window.innerHeight * 0.3
+      const isInView = rect && Math.abs(rect.top) < window.innerHeight * 0.05
       if (!isInView) return
 
       // 애니메이션 중 스크롤 차단
@@ -207,9 +210,9 @@ export default function FeaturesSection() {
         ref={textRef}
         className="absolute inset-0 flex items-center justify-center z-10 px-20 pointer-events-none"
       >
-        <p className="text-center text-2xl md:text-4xl xl:text-5xl font-bold text-neutral-900 leading-snug tracking-tight break-all whitespace-pre-line">
-          네일톡톡은 네일을 더 쉽고 빠르게<br />
-          만들겠다는 목표를 위해 나아가고 있습니다.
+        <p className="text-center text-2xl md:text-4xl xl:text-5xl font-bold text-neutral-900 leading-snug tracking-tight break-all whitespace-pre-line md:whitespace-normal">
+          네일톡톡은 네일을 {'\n'} 더 쉽고 빠르게<br />
+          만들겠다는 목표를 위해 {'\n'} 나아가고 있습니다.
         </p>
       </div>
 

@@ -17,17 +17,26 @@ export default function IntroTake1({ onComplete }: Take1Props) {
     const lenis = getLenis()
     lenis?.stop()
 
-    const prevent = (e: Event) => e.preventDefault()
-    document.documentElement.style.overflow = 'hidden'
-    window.addEventListener('wheel', prevent, { passive: false })
-    window.addEventListener('touchmove', prevent, { passive: false })
+    const prevent = (e: Event) => {
+      e.preventDefault()
+      e.stopImmediatePropagation()
+    }
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('wheel', prevent, { passive: false, capture: true })
+    window.addEventListener('touchmove', prevent, { passive: false, capture: true })
 
-    const timer = setTimeout(() => onComplete(), 2450)
+    const timer = setTimeout(() => {
+      lenis?.start()
+      lenis?.scrollTo(0, { immediate: true })
+      window.scrollTo(0, 0)
+      onComplete()
+    }, 2450)
+
     return () => {
       clearTimeout(timer)
-      document.documentElement.style.overflow = ''
-      window.removeEventListener('wheel', prevent)
-      window.removeEventListener('touchmove', prevent)
+      document.body.style.overflow = ''
+      window.removeEventListener('wheel', prevent, true)
+      window.removeEventListener('touchmove', prevent, true)
       lenis?.start()
     }
   }, [onComplete])
