@@ -5,8 +5,11 @@ import { HeaderProvider } from '@/contexts/HeaderContext'
 import Header from '@/components/layout/Header'
 
 export const metadata: Metadata = {
-  title: 'Nailtoctoc',
-  description: 'Nailtoctoc Homepage',
+  title: '네일톡톡 홈페이지',
+  description: '인터랙티브 반응형 웹으로 제작한 네일톡톡 홈페이지 리뉴얼',
+  icons: {
+    icon: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({
