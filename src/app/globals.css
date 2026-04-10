@@ -4,14 +4,20 @@
   --background: #ffffff;
   --foreground: #111111;
   --primary: #FF527C;
+  --grayscale-100: #F2F4F6;
+  --grayscale-200: #EBEBEB;
+  --grayscale-400: #A7A7A7;
+  --grayscale-700: #707070;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-grayscale-100: var(--grayscale-100);
+  --color-grayscale-200: var(--grayscale-200);
+  --color-grayscale-400: var(--grayscale-400);
+  --color-grayscale-700: var(--grayscale-700);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,6 +25,10 @@
     --background: #ffffff;
     --foreground: #111111;
     --primary: #FF527C;
+    --grayscale-100: #F2F4F6;
+    --grayscale-200: #EBEBEB;
+    --grayscale-400: #A7A7A7;
+    --grayscale-700: #707070;
   }
 }
 
@@ -29,7 +39,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Pretendard", sans-serif;
   overflow-x: hidden;
 }
 

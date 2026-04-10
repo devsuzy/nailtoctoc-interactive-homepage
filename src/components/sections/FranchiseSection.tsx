@@ -57,19 +57,19 @@ export default function FranchiseSection() {
     tl.to(listRef.current, { autoAlpha: 1, duration: 0.2, ease: 'power2.out' }, 1.0)
 
     // Step 2 → 3: item[0] 강조
-    tl.to(itemRefs.current[0], { opacity: 1, duration: 0.2, ease: 'power2.out' }, 2.0)
+    tl.to(itemRefs.current[0], { opacity: 1, duration: 0.1, ease: 'power2.out' }, 2.0)
 
     // Step 3 → 4: item[0] → 50%, item[1] → 100%
-    tl.to(itemRefs.current[0], { opacity: 0.5, duration: 0.2, ease: 'power2.inOut' }, 3.0)
-    tl.to(itemRefs.current[1], { opacity: 1, duration: 0.2, ease: 'power2.inOut' }, 3.0)
+    tl.to(itemRefs.current[0], { opacity: 0.5, duration: 0.1, ease: 'power2.inOut' }, 3.0)
+    tl.to(itemRefs.current[1], { opacity: 1, duration: 0.1, ease: 'power2.inOut' }, 3.0)
 
     // Step 4 → 5: item[1] → 50%, item[2] → 100%
-    tl.to(itemRefs.current[1], { opacity: 0.5, duration: 0.2, ease: 'power2.inOut' }, 4.0)
-    tl.to(itemRefs.current[2], { opacity: 1, duration: 0.2, ease: 'power2.inOut' }, 4.0)
+    tl.to(itemRefs.current[1], { opacity: 0.5, duration: 0.1, ease: 'power2.inOut' }, 4.0)
+    tl.to(itemRefs.current[2], { opacity: 1, duration: 0.1, ease: 'power2.inOut' }, 4.0)
 
     // Step 5 → 6: item[2] → 50%, item[3] → 100%
-    tl.to(itemRefs.current[2], { opacity: 0.5, duration: 0.2, ease: 'power2.inOut' }, 5.0)
-    tl.to(itemRefs.current[3], { opacity: 1, duration: 0.2, ease: 'power2.inOut' }, 5.0)
+    tl.to(itemRefs.current[2], { opacity: 0.5, duration: 0.1, ease: 'power2.inOut' }, 5.0)
+    tl.to(itemRefs.current[3], { opacity: 1, duration: 0.1, ease: 'power2.inOut' }, 5.0)
 
     stepTimesRef.current = [0, STEP_1, STEP_2, STEP_3, STEP_4, STEP_5, tl.totalDuration()]
     tlRef.current = tl

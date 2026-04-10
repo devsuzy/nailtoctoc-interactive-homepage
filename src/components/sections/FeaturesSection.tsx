@@ -230,7 +230,7 @@ export default function FeaturesSection() {
                 alt=""
                 width={250}
                 height={250}
-                className="w-60 h-60 md:w-1/2 md:h-1/2 shrink-0"
+                className="w-60 h-60 md:w-[31.25rem] md:h-[31.25rem] shrink-0"
                 priority={i === 0}
               />
               <div className="flex flex-col gap-3 md:gap-5">

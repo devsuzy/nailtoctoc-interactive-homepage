@@ -39,11 +39,22 @@ export function useScrollSnap() {
 
       const targetIndex = Math.max(0, Math.min(sections.length - 1, currentIndex + direction))
 
-      // 경계에서 더 이상 이동 불가 → 자유 스크롤 차단
+      // 경계에서 더 이상 이동 불가
       if (targetIndex === currentIndex) {
+        // 마지막 섹션에서 아래로 스크롤 시, 섹션에 더 볼 컨텐츠가 있으면 자연 스크롤 허용
+        if (direction > 0) {
+          const sectionBottom = sections[currentIndex].getBoundingClientRect().bottom
+          if (sectionBottom > viewportH + 1) return
+        }
         e.preventDefault()
         e.stopImmediatePropagation()
         return
+      }
+
+      // 높이가 큰 섹션(e.g. FaqSection) 내부에서 위로 스크롤 시 섹션 top에 도달하기 전까지 자연 스크롤 허용
+      if (direction < 0) {
+        const sectionTop = sections[currentIndex].getBoundingClientRect().top
+        if (sectionTop < -1) return
       }
 
       e.preventDefault()
