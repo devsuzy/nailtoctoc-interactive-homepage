@@ -32,7 +32,7 @@ export default function HowToUseContent() {
     <ul className="flex flex-col gap-14 md:gap-8">
       {steps.map((step) => (
         <li key={step.id} className="flex flex-col gap-4 md:flex-row md:items-center md:gap-8">
-          <div className="relative w-full aspect-square shrink-0 rounded-2xl overflow-hidden md:w-48 md:h-48">
+          <div className="relative w-full aspect-square shrink-0 rounded-2xl overflow-hidden md:w-96 md:h-96">
             <Image src={step.img} alt={step.title} fill className="object-cover" />
           </div>
           <div className="flex flex-col gap-2 md:gap-3">

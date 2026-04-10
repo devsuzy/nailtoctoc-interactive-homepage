@@ -6,11 +6,17 @@ import { getLenis } from '@/lib/lenis'
 // FeaturesSection에서 스냅 애니메이션 진행 여부를 확인하기 위한 공유 잠금
 export const snapLock = { active: false }
 
+// 섹션 내부에서 스크롤을 자체 처리할 때 useScrollSnap의 스냅을 차단하는 플래그
+export const internalScrollLock = { active: false }
+
 export function useScrollSnap() {
   const isScrollingRef = useRef(false)
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
+      // 섹션 내부 스크롤 처리 중 → 스냅 차단, 섹션 핸들러에 위임
+      if (internalScrollLock.active) return
+
       // 스냅 애니메이션 진행 중 → 모든 스크롤 완전 차단 (Lenis 포함)
       if (isScrollingRef.current) {
         e.preventDefault()
