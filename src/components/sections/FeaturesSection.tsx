@@ -60,14 +60,15 @@ const features = [
   },
 ]
 
-// Step 0 (0s)        : 이미지 화면 밖
-// Step 1 (2.0s)      : 이미지 화면 안 (대기)
-// Step 2 (3.0s)      : 피처 1 표시
-// Step 3 (3.6s)      : 피처 2 표시
-// Step 4 (totalDur)  : 피처 3 표시
-const STEP_1_TIME = 2.0
-const STEP_2_TIME = 3.0
-const STEP_3_TIME = 3.6
+// 섹션 진입 시 자동으로 이미지 등장 (0.3초 딜레이)
+// stepRef -1      : 진입 전 / intro 재생 중
+// Step 0 (2.2s)   : 이미지 화면 안 (스크롤 대기)
+// Step 1 (3.2s)   : 이미지 퇴장 + 피처 1 표시
+// Step 2 (3.8s)   : 피처 2 표시
+// Step 3 (totalDur): 피처 3 표시
+const INTRO_END_TIME = 2.2
+const FEAT_1_TIME = 3.2
+const FEAT_2_TIME = 3.8
 
 export default function FeaturesSection() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -78,64 +79,104 @@ export default function FeaturesSection() {
   const take2Ref = useRef<HTMLDivElement>(null)
   const featureRefs = useRef<(HTMLDivElement | null)[]>(Array(3).fill(null))
   const tlRef = useRef<gsap.core.Timeline | null>(null)
-  const stepRef = useRef(0)
-  const stepTimesRef = useRef<number[]>([0, STEP_1_TIME, STEP_2_TIME, STEP_3_TIME, 3.6])
+  const stepRef = useRef(-1) // -1: intro 미완료, 0~3: 스크롤 단계
+  const stepTimesRef = useRef<number[]>([INTRO_END_TIME, FEAT_1_TIME, FEAT_2_TIME, 5.0])
   const isAnimatingRef = useRef(false)
+  const introPlayedRef = useRef(false)
+
+  const resetSection = useCallback(() => {
+    const tl = tlRef.current
+    if (tl) tl.pause().seek(0)
+    introPlayedRef.current = false
+    stepRef.current = -1
+    isAnimatingRef.current = false
+    imageConfigs.forEach((config, i) => {
+      if (imgRefs.current[i]) gsap.set(imgRefs.current[i], { x: config.initX, y: config.initY })
+    })
+    if (take2Ref.current) gsap.set(take2Ref.current, { autoAlpha: 0 })
+    if (featureRefs.current[0]) gsap.set(featureRefs.current[0], { autoAlpha: 1 })
+    if (featureRefs.current[1]) gsap.set(featureRefs.current[1], { autoAlpha: 0 })
+    if (featureRefs.current[2]) gsap.set(featureRefs.current[2], { autoAlpha: 0 })
+    if (textRef.current) gsap.set(textRef.current, { opacity: 1 })
+  }, [])
 
   // GSAP 타임라인 구성
   useEffect(() => {
     imageConfigs.forEach((config, i) => {
       if (imgRefs.current[i]) gsap.set(imgRefs.current[i], { x: config.initX, y: config.initY })
     })
-    // take2 컨테이너: 투명하게 시작
     if (take2Ref.current) gsap.set(take2Ref.current, { autoAlpha: 0 })
-    // 피처 1은 기본 표시, 2·3은 숨김
     if (featureRefs.current[1]) gsap.set(featureRefs.current[1], { autoAlpha: 0 })
     if (featureRefs.current[2]) gsap.set(featureRefs.current[2], { autoAlpha: 0 })
     if (textRef.current) gsap.set(textRef.current, { opacity: 1 })
 
     const tl = gsap.timeline({ paused: true })
 
-    // Phase 1: 이미지 진입 (0 → ~1.7s)
+    // Phase 1: 이미지 진입 (0.3초 딜레이 후 사방에서 등장)
     imageConfigs.forEach((_, i) => {
       tl.to(
         imgRefs.current[i],
         { x: 0, y: 0, duration: 1.2, ease: 'power3.out' },
-        i * 0.1,
+        0.3 + i * 0.1,
       )
     })
-    // STEP_1_TIME = 2.0s (홀드 포인트)
+    // INTRO_END_TIME = 3.0s (이미지 등장 완료, 스크롤 대기)
 
-    // Phase 2: 이미지 퇴장 + 텍스트 페이드 + 컨테이너 등장
+    // Phase 2: 이미지 퇴장 + 피처 1 등장
     imageConfigs.forEach((config, i) => {
       tl.to(
         imgRefs.current[i],
         { x: config.initX, y: config.initY, duration: 1.0, ease: 'power2.in' },
-        STEP_1_TIME + i * 0.08,
+        INTRO_END_TIME + i * 0.08,
       )
     })
-    tl.to(textRef.current, { opacity: 0, duration: 0.3, ease: 'power2.in' }, STEP_1_TIME)
-    // 컨테이너: STEP_1_TIME + 0.4 ~ STEP_2_TIME에 완전히 표시 (이미지 뒤를 덮음)
-    tl.to(take2Ref.current, { autoAlpha: 1, duration: 0.4, ease: 'power2.out' }, STEP_1_TIME + 0.4)
-    // STEP_2_TIME = 2.0s (피처 1 표시 포인트)
+    tl.to(textRef.current, { opacity: 0, duration: 0.3, ease: 'power2.in' }, INTRO_END_TIME)
+    tl.to(take2Ref.current, { autoAlpha: 1, duration: 0.4, ease: 'power2.out' }, INTRO_END_TIME + 0.4)
 
-    // 피처 1 → 2 크로스페이드 (2.2s~2.6s)
-    tl.to(featureRefs.current[0], { autoAlpha: 0, duration: 0.2, ease: 'power2.inOut' }, STEP_2_TIME + 0.2)
-    tl.to(featureRefs.current[1], { autoAlpha: 1, duration: 0.2, ease: 'power2.inOut' }, STEP_2_TIME + 0.2)
-    // STEP_3_TIME = 2.6s (피처 2 표시 포인트)
+    // 피처 1 → 2 크로스페이드
+    tl.to(featureRefs.current[0], { autoAlpha: 0, duration: 0.2, ease: 'power2.inOut' }, FEAT_1_TIME + 0.2)
+    tl.to(featureRefs.current[1], { autoAlpha: 1, duration: 0.2, ease: 'power2.inOut' }, FEAT_1_TIME + 0.2)
 
-    // 피처 2 → 3 크로스페이드 (2.8s~3.2s)
-    tl.to(featureRefs.current[1], { autoAlpha: 0, duration: 0.2, ease: 'power2.inOut' }, STEP_3_TIME + 0.2)
-    tl.to(featureRefs.current[2], { autoAlpha: 1, duration: 0.2, ease: 'power2.inOut' }, STEP_3_TIME + 0.2)
-    // totalDuration ≈ 3.6s (피처 3 표시 포인트)
+    // 피처 2 → 3 크로스페이드
+    tl.to(featureRefs.current[1], { autoAlpha: 0, duration: 0.2, ease: 'power2.inOut' }, FEAT_2_TIME + 0.2)
+    tl.to(featureRefs.current[2], { autoAlpha: 1, duration: 0.2, ease: 'power2.inOut' }, FEAT_2_TIME + 0.2)
 
-    stepTimesRef.current = [0, STEP_1_TIME, STEP_2_TIME, STEP_3_TIME, tl.totalDuration()]
+    stepTimesRef.current = [INTRO_END_TIME, FEAT_1_TIME, FEAT_2_TIME, tl.totalDuration()]
     tlRef.current = tl
 
     return () => { tl.kill() }
   }, [])
 
-  // 지정 스텝으로 타임라인 이동 (앞/뒤 모두 자연스럽게)
+  // 섹션 진입 감지 → 0.3초 딜레이 후 intro 자동 재생
+  useEffect(() => {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        const tl = tlRef.current
+        if (!tl) return
+
+        if (entry.isIntersecting) {
+          if (!introPlayedRef.current) {
+            introPlayedRef.current = true
+            stepRef.current = -1
+            // 타임라인을 INTRO_END_TIME까지 실시간(ease: none)으로 재생
+            tl.tweenTo(INTRO_END_TIME, {
+              duration: INTRO_END_TIME,
+              ease: 'none',
+              onComplete: () => { stepRef.current = 0 },
+            })
+          }
+        } else {
+          // 섹션 이탈 시 리셋 (다시 진입하면 이미지가 처음부터 등장)
+          resetSection()
+        }
+      })
+    }, { threshold: 0.5 })
+
+    if (sectionRef.current) observer.observe(sectionRef.current)
+    return () => observer.disconnect()
+  }, [resetSection])
+
+  // 지정 스텝으로 타임라인 이동
   const goToStep = useCallback((newStep: number) => {
     const tl = tlRef.current
     if (!tl || isAnimatingRef.current) return
@@ -155,24 +196,24 @@ export default function FeaturesSection() {
   // 스크롤 이벤트 캡처
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      // 섹션 스냅 애니메이션 진행 중이면 처리하지 않음
       if (snapLock.active) return
 
       const rect = sectionRef.current?.getBoundingClientRect()
       const isInView = rect && Math.abs(rect.top) < window.innerHeight * 0.05
       if (!isInView) return
 
-      // 애니메이션 중 스크롤 차단
-      if (isAnimatingRef.current) {
+      const step = stepRef.current
+
+      // intro 진행 중 또는 애니메이션 중 스크롤 차단
+      if (step < 0 || isAnimatingRef.current) {
         e.preventDefault()
         e.stopImmediatePropagation()
         return
       }
 
       const scrollingDown = e.deltaY > 0
-      const step = stepRef.current
 
-      if (scrollingDown && step < 4) {
+      if (scrollingDown && step < 3) {
         e.preventDefault()
         e.stopImmediatePropagation()
         goToStep(step + 1)
@@ -181,7 +222,7 @@ export default function FeaturesSection() {
         e.stopImmediatePropagation()
         goToStep(step - 1)
       }
-      // step 0 + 스크롤업, step 2 + 스크롤다운 → scroll snap에 위임
+      // step 0 + 스크롤업, step 3 + 스크롤다운 → scroll snap에 위임
     }
 
     window.addEventListener('wheel', handleWheel, { capture: true, passive: false })
