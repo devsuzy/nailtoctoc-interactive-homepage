@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useHeaderSection } from '@/hooks/useHeaderSection'
 import IcoNaverBlog from '@/assets/icons/ico-naver-blog.svg'
 import IcoInstagram from '@/assets/icons/ico-instagram.svg'
@@ -25,7 +26,7 @@ export default function SocialSection() {
   const [currentPage, setCurrentPage] = useState(1)
   const [isMobile, setIsMobile] = useState(false)
 
-  useHeaderSection(sectionRef, 'transparent')
+  useHeaderSection(sectionRef, 'white')
 
   useEffect(() => {
     fetch('/data/list.json')
@@ -60,7 +61,7 @@ export default function SocialSection() {
             더 들여다 보고 싶다면?
           </h2>
           <div className="flex items-center gap-3">
-            <a
+            <Link
               href="https://blog.naver.com/nailtoctoc"
               target="_blank"
               rel="noopener noreferrer"
@@ -68,8 +69,8 @@ export default function SocialSection() {
             >
               <IcoNaverBlog />
               <span className="flex gap-0.5">네이버 블로그 <IcoArrow /></span>
-            </a>
-            <a
+            </Link>
+            <Link
               href="https://www.instagram.com/nailtoctoc_official"
               target="_blank"
               rel="noopener noreferrer"
@@ -77,7 +78,7 @@ export default function SocialSection() {
             >
               <IcoInstagram />
               <span className="flex gap-0.5">인스타그램 <IcoArrow /></span>
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -85,7 +86,7 @@ export default function SocialSection() {
         <ul className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8">
           {pagedItems.map((item) => (
             <li key={item.id}>
-              <a
+              <Link
                 href={item.url}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -112,7 +113,7 @@ export default function SocialSection() {
                     <p>{item.createdAt}</p>
                   </div>
                 </div>
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
