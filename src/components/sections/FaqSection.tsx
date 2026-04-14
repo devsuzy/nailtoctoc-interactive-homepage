@@ -238,7 +238,7 @@ export default function FaqSection() {
       </div>
 
       {/* 컨텐츠 영역 */}
-      <div ref={contentRef} className="relative z-10 min-h-screen px-5 md:px-0 pt-32 pb-24 max-w-3xl mx-auto">
+      <div ref={contentRef} className="relative z-10 min-h-screen px-5 md:px-0 pt-[5.25rem] max-w-[68.75rem] mx-auto">
         <TabContent activeTab={activeTab} />
       </div>
     </section>

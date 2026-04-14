@@ -32,7 +32,7 @@ export default function StudioContent() {
         ))}
       </ul>
 
-      <div className="relative w-full h-full aspect-square rounded-2xl overflow-hidden">
+      <div className="relative w-full min-h-[34rem] md:min-h-[60rem] rounded-2xl overflow-hidden">
         <Image src={studio.img} alt={`${studio.name} 스튜디오`} fill className="object-contain" />
       </div>
     </div>

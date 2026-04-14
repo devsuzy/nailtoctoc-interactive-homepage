@@ -1,0 +1,66 @@
+[
+  {
+    "id": 1,
+    "title": "네일톡톡이 뭐야 한눈에 이해하는 초보자 설명서",
+    "source": "네이버 블로그",
+    "createdAt": "2025-11-25",
+    "thumbnail": "/images/blog-thumbnail-img-1.png",
+    "url": "https://blog.naver.com/nailtoctoc/224087959425"
+  },
+  {
+    "id": 2,
+    "title": "프린팅 네일이란? 젤네일을 하던 사람들이 네일톡톡으로 바꾸는 이유",
+    "source": "네이버 블로그",
+    "createdAt": "2025-11-26",
+    "thumbnail": "/images/blog-thumbnail-img-2.png",
+    "url": "https://blog.naver.com/nailtoctoc/224088069722"
+  },
+  {
+    "id": 3,
+    "title": "초보자도 쉽게 고르는 네일톡톡 디자인 안내서",
+    "source": "네이버 블로그",
+    "createdAt": "2025-11-26",
+    "thumbnail": "/images/blog-thumbnail-img-3.png",
+    "url": "https://blog.naver.com/nailtoctoc/224088453296"
+  },
+  {
+    "id": 4,
+    "title": "범계 네일톡톡 프린팅 과정 A to Z 체험 후기",
+    "source": "네이버 블로그",
+    "createdAt": "2025-11-26",
+    "thumbnail": "/images/blog-thumbnail-img-4.png",
+    "url": "https://blog.naver.com/nailtoctoc/224089044196"
+  },
+  {
+    "id": 5,
+    "title": "셀프네일 vs 프린팅네일 차이점과 장점 분석",
+    "source": "네이버 블로그",
+    "createdAt": "2025-11-26",
+    "thumbnail": "/images/blog-thumbnail-img-5.png",
+    "url": "https://blog.naver.com/nailtoctoc/224089082473"
+  },
+  {
+    "id": 6,
+    "title": "네일톡톡 받기 전 네일 준비 과정 안내",
+    "source": "네이버 블로그",
+    "createdAt": "2025-12-08",
+    "thumbnail": "/images/blog-thumbnail-img-6.png",
+    "url": "https://blog.naver.com/nailtoctoc/224102397027"
+  },
+  {
+    "id": 7,
+    "title": "네일 수명을 결정하는 네일톡톡 손상 최소화 제거 가이드",
+    "source": "네이버 블로그",
+    "createdAt": "2026-01-06",
+    "thumbnail": "/images/blog-thumbnail-img-7.png",
+    "url": "https://blog.naver.com/nailtoctoc/224136573530"
+  },
+  {
+    "id": 8,
+    "title": "네일톡톡, 홍대착륙! [네일톡톡 홍대 팝업스토어]",
+    "source": "네이버 블로그",
+    "createdAt": "2026-04-08",
+    "thumbnail": "/images/blog-thumbnail-img-8.jpg",
+    "url": "https://blog.naver.com/nailtoctoc/224245450555"
+  }
+]
