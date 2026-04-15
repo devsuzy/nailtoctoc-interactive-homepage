@@ -53,7 +53,12 @@ export default function Footer() {
         </div>
         <p className="text-white text-xs mb-5 md:mb-[3.75rem] md:text-sm">평일 9:00 - 18:00 (주말 및 공휴일 휴무)｜점심시간 12:00 ~ 13:00</p>
         <div className="flex items-center gap-3">
-          <button className="border border-white/20 text-sm font-semibold text-white rounded-xl py-[0.875rem] px-10">상담 신청</button>
+          <Link
+            href="/inquiry"
+            className="border border-white/20 text-sm font-semibold text-white rounded-xl py-[0.875rem] px-10"
+          >
+            상담 신청
+          </Link>
           <Link
             href="https://www.instagram.com/nailtoctoc_official"
             target="_blank"
