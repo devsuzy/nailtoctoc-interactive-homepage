@@ -46,7 +46,7 @@ export default function Footer() {
       </div>
 
       {/* Customer Center Section */}
-      <div className="flex flex-col justify-around pt-5 pb-10 md:w-1/3">
+      <div className="flex flex-col justify-around pt-5 md:w-1/3">
         <div className="flex flex-col gap-1 mb-4">
           <p className="text-white/50 text-sm md:text-base">고객센터</p>
           <p className="text-white font-semibold text-base md:text-xl">031-429-9880</p>
