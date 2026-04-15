@@ -33,7 +33,7 @@ export default function Header() {
           {/* 가맹문의 버튼 */}
           <Link
             href="/inquiry"
-            className='rounded-full align-middle px-4 py-2 text-sm font-semibold transition-colors duration-300 md:py-3 md:text-base bg-primary text-white'
+            className='rounded-full align-middle px-4 py-2 text-sm font-semibold leading-[120%] md:leading-[100%] transition-colors duration-300 md:py-3 md:text-base bg-primary text-white'
           >
             상담 신청
           </Link>

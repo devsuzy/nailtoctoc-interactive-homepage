@@ -56,7 +56,7 @@ export default function SocialSection() {
       <div className="max-w-screen-xl mx-auto">
         {/* 섹션 타이틀 */}
         <div className="flex flex-col justify-between gap-5 mb-5 md:mb-8 md:flex-row">
-          <h2 className="text-2xl font-semibold text-foreground md:text-3xl">
+          <h2 className="text-2xl font-semibold text-foreground leading-snug md:text-3xl">
             네일톡톡의 이야기를, <br />
             더 들여다 보고 싶다면?
           </h2>
@@ -65,7 +65,7 @@ export default function SocialSection() {
               href="https://blog.naver.com/nailtoctoc"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-2xl bg-grayscale-100 px-3 py-2 md:py-3 text-xs font-medium text-foreground hover:bg-grayscale-200 transition-colors md:text-sm md:gap-3"
+              className="inline-flex items-center gap-2 rounded-full bg-grayscale-100 px-3 py-2 md:py-3 text-xs font-medium text-foreground hover:bg-grayscale-200 transition-colors md:text-sm md:gap-3"
             >
               <IcoNaverBlog />
               <span className="flex gap-0.5">네이버 블로그 <IcoArrow /></span>
@@ -74,7 +74,7 @@ export default function SocialSection() {
               href="https://www.instagram.com/nailtoctoc_official"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-2xl bg-grayscale-100 px-3 py-2 md:py-3 text-xs font-medium text-foreground hover:bg-grayscale-200 transition-colors md:text-sm md:gap-3"
+              className="inline-flex items-center gap-2 rounded-full bg-grayscale-100 px-3 py-2 md:py-3 text-xs font-medium text-foreground hover:bg-grayscale-200 transition-colors md:text-sm md:gap-3"
             >
               <IcoInstagram />
               <span className="flex gap-0.5">인스타그램 <IcoArrow /></span>
@@ -103,7 +103,7 @@ export default function SocialSection() {
                 </div>
 
                 {/* 텍스트 */}
-                <div className="flex flex-col justify-center gap-3 flex-1">
+                <div className="flex flex-col justify-center gap-3 flex-1 lg:max-w-[214px]">
                   <p className="text-base font-semibold text-foreground leading-snug line-clamp-2 group-hover:underline md:text-xl">
                     {item.title}
                   </p>
@@ -121,16 +121,16 @@ export default function SocialSection() {
         {/* 페이지네이션 */}
         {totalPages > 1 && (
           <div className="flex items-center justify-center gap-2 mt-8">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="w-9 h-9 flex items-center justify-center rounded-full border border-grayscale-200 text-grayscale-400 disabled:opacity-30 hover:border-foreground hover:text-foreground transition-colors cursor-pointer disabled:cursor-default"
-              aria-label="이전 페이지"
-            >
-              <svg width="7" height="12" viewBox="0 0 7 12" fill="none">
-                <path d="M6 1L1 6L6 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
+            {/*<button*/}
+            {/*  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}*/}
+            {/*  disabled={currentPage === 1}*/}
+            {/*  className="w-9 h-9 flex items-center justify-center rounded-full border border-grayscale-200 text-grayscale-400 disabled:opacity-30 hover:border-foreground hover:text-foreground transition-colors cursor-pointer disabled:cursor-default"*/}
+            {/*  aria-label="이전 페이지"*/}
+            {/*>*/}
+            {/*  <svg width="7" height="12" viewBox="0 0 7 12" fill="none">*/}
+            {/*    <path d="M6 1L1 6L6 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>*/}
+            {/*  </svg>*/}
+            {/*</button>*/}
 
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <button
@@ -139,7 +139,7 @@ export default function SocialSection() {
                 className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-semibold transition-colors cursor-pointer ${
                   page === currentPage
                     ? 'bg-grayscale-100 text-foreground'
-                    : 'text-grayscale-400 hover:text-grayscale-100'
+                    : 'text-grayscale-400 hover:bg-grayscale-100 hover:text-foreground'
                 }`}
                 aria-label={`${page}페이지`}
                 aria-current={page === currentPage ? 'page' : undefined}
@@ -148,16 +148,16 @@ export default function SocialSection() {
               </button>
             ))}
 
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="w-9 h-9 flex items-center justify-center rounded-full border border-grayscale-200 text-grayscale-400 disabled:opacity-30 hover:border-foreground hover:text-foreground transition-colors cursor-pointer disabled:cursor-default"
-              aria-label="다음 페이지"
-            >
-              <svg width="7" height="12" viewBox="0 0 7 12" fill="none">
-                <path d="M1 1L6 6L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
+            {/*<button*/}
+            {/*  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}*/}
+            {/*  disabled={currentPage === totalPages}*/}
+            {/*  className="w-9 h-9 flex items-center justify-center rounded-full border border-grayscale-200 text-grayscale-400 disabled:opacity-30 hover:border-foreground hover:text-foreground transition-colors cursor-pointer disabled:cursor-default"*/}
+            {/*  aria-label="다음 페이지"*/}
+            {/*>*/}
+            {/*  <svg width="7" height="12" viewBox="0 0 7 12" fill="none">*/}
+            {/*    <path d="M1 1L6 6L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>*/}
+            {/*  </svg>*/}
+            {/*</button>*/}
           </div>
         )}
       </div>
