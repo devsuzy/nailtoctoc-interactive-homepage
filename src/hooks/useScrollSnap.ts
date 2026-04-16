@@ -11,28 +11,25 @@ export const internalScrollLock = { active: false }
 
 export function useScrollSnap() {
   const isScrollingRef = useRef(false)
+  const touchStartYRef = useRef(0)
 
   useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      // 섹션 내부 스크롤 처리 중 → 스냅 차단, 섹션 핸들러에 위임
-      if (internalScrollLock.active) return
-
-      // 스냅 애니메이션 진행 중 → 모든 스크롤 완전 차단 (Lenis 포함)
+    const snapToDirection = (direction: 1 | -1, preventDefault: () => void, stopPropagation: () => void) => {
+      if (internalScrollLock.active) return false
       if (isScrollingRef.current) {
-        e.preventDefault()
-        e.stopImmediatePropagation()
-        return
+        preventDefault()
+        stopPropagation()
+        return false
       }
 
       const sections = Array.from(
         document.querySelectorAll('[data-snap-section]')
       ) as HTMLElement[]
 
-      if (sections.length === 0) return
+      if (sections.length === 0) return false
 
       const scrollY = window.scrollY
       const viewportH = window.innerHeight
-      const direction = e.deltaY > 0 ? 1 : -1
 
       // 현재 섹션 인덱스 계산
       let currentIndex = 0
@@ -47,24 +44,23 @@ export function useScrollSnap() {
 
       // 경계에서 더 이상 이동 불가
       if (targetIndex === currentIndex) {
-        // 마지막 섹션에서 아래로 스크롤 시, 섹션에 더 볼 컨텐츠가 있으면 자연 스크롤 허용
         if (direction > 0) {
           const sectionBottom = sections[currentIndex].getBoundingClientRect().bottom
-          if (sectionBottom > viewportH + 1) return
+          if (sectionBottom > viewportH + 1) return false
         }
-        e.preventDefault()
-        e.stopImmediatePropagation()
-        return
+        preventDefault()
+        stopPropagation()
+        return false
       }
 
       // 높이가 큰 섹션(e.g. FaqSection) 내부에서 위로 스크롤 시 섹션 top에 도달하기 전까지 자연 스크롤 허용
       if (direction < 0) {
         const sectionTop = sections[currentIndex].getBoundingClientRect().top
-        if (sectionTop < -1) return
+        if (sectionTop < -1) return false
       }
 
-      e.preventDefault()
-      e.stopImmediatePropagation()
+      preventDefault()
+      stopPropagation()
 
       const lenis = getLenis()
       const targetTop = sections[targetIndex].getBoundingClientRect().top + scrollY
@@ -95,10 +91,54 @@ export function useScrollSnap() {
           unlock()
         }, 1200)
       }
+
+      return true
+    }
+
+    const handleWheel = (e: WheelEvent) => {
+      const direction = e.deltaY > 0 ? 1 : -1
+      snapToDirection(
+        direction,
+        () => e.preventDefault(),
+        () => e.stopImmediatePropagation()
+      )
+    }
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartYRef.current = e.touches[0].clientY
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      // 스냅 애니메이션 진행 중에는 터치 스크롤 차단
+      if (isScrollingRef.current) {
+        e.preventDefault()
+      }
+    }
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const deltaY = touchStartYRef.current - e.changedTouches[0].clientY
+      // 최소 스와이프 거리 미달 시 무시 (단순 탭 등)
+      if (Math.abs(deltaY) < 50) return
+
+      const direction = deltaY > 0 ? 1 : -1
+      snapToDirection(
+        direction,
+        () => e.preventDefault(),
+        () => {}
+      )
     }
 
     // capture: true → FeaturesSection(capture, 먼저 등록) 이후, Lenis(bubble) 이전에 실행
     window.addEventListener('wheel', handleWheel, { passive: false, capture: true })
-    return () => window.removeEventListener('wheel', handleWheel, true)
+    window.addEventListener('touchstart', handleTouchStart, { passive: true })
+    window.addEventListener('touchmove', handleTouchMove, { passive: false })
+    window.addEventListener('touchend', handleTouchEnd, { passive: false })
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel, true)
+      window.removeEventListener('touchstart', handleTouchStart)
+      window.removeEventListener('touchmove', handleTouchMove)
+      window.removeEventListener('touchend', handleTouchEnd)
+    }
   }, [])
 }
