@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { gsap } from '@/lib/gsap'
 import { useHeaderSection } from '@/hooks/useHeaderSection'
-import { snapLock, internalScrollLock } from '@/hooks/useScrollSnap'
 import { getLenis } from '@/lib/lenis'
 import HowToUseContent from './faq/HowToUseContent'
 import PrintTypeContent from './faq/PrintTypeContent'
@@ -30,13 +29,10 @@ function TabContent({ activeTab }: { activeTab: string }) {
   }
 }
 
-/**
- * 스크롤 스텝
- * step0: title + tabs 노출, 모든 탭 비활성화
- * step1: title + tabs 노출, 기본값(faq) 탭 활성화
- * animating: step1 ↔ content 전환 중
- * content: 콘텐츠 노출, title + tabs 숨김
- */
+// step0: 섹션 진입 (탭 비활성)
+// step1: 탭 활성
+// animating: 전환 중
+// content: 컨텐츠 노출
 type Phase = 'step0' | 'step1' | 'animating' | 'content'
 
 export default function FaqSection() {
@@ -47,16 +43,44 @@ export default function FaqSection() {
   const contentRef  = useRef<HTMLDivElement>(null)
   const tlRef       = useRef<gsap.core.Timeline | null>(null)
   const phaseRef    = useRef<Phase>('step0')
-  const lockRef     = useRef(false)
 
-  const [activeTab, setActiveTab]       = useState('faq')
-  const [showActive, setShowActive]     = useState(false)
-  // content 단계에서만 section 높이를 min-h-screen으로 열어줌
-  // step0/step1은 h-screen으로 고정해 snap이 항상 100vh로 동작
+  const [activeTab, setActiveTab]           = useState('faq')
+  const [showActive, setShowActive]         = useState(false)
   const [isContentPhase, setIsContentPhase] = useState(false)
 
   useHeaderSection(sectionRef, 'white')
 
+  // ── 단계별 전환 함수 (effects보다 먼저 선언) ─────────────
+  const goToStep1 = useCallback(() => {
+    phaseRef.current = 'step1'
+    setShowActive(true)
+  }, [])
+
+  const goToStep0 = useCallback(() => {
+    phaseRef.current = 'step0'
+    setShowActive(false)
+  }, [])
+
+  const goToContent = useCallback(() => {
+    if (phaseRef.current !== 'step1') return
+    phaseRef.current = 'animating'
+    setIsContentPhase(true)
+    requestAnimationFrame(() => tlRef.current?.play())
+  }, [])
+
+  const goToIntro = useCallback(() => {
+    if (phaseRef.current !== 'content') return
+    phaseRef.current = 'animating'
+    // Lenis momentum 초기화: 섹션 상단으로 즉시 스냅 (관성으로 섹션이 지나치는 것 방지)
+    const lenis = getLenis()
+    if (lenis && sectionRef.current) {
+      const r = sectionRef.current.getBoundingClientRect()
+      lenis.scrollTo(window.scrollY + r.top, { immediate: true })
+    }
+    tlRef.current?.reverse()
+  }, [])
+
+  // ── intro ↔ content 전환 타임라인 ──────────────────────────
   useEffect(() => {
     gsap.set(contentRef.current, { autoAlpha: 0, y: 40 })
 
@@ -68,6 +92,7 @@ export default function FaqSection() {
       },
       onReverseComplete: () => {
         phaseRef.current = 'step1'
+        setShowActive(true)
         setIsContentPhase(false)
         if (introRef.current) introRef.current.style.pointerEvents = ''
       },
@@ -81,132 +106,173 @@ export default function FaqSection() {
     return () => { tl.kill() }
   }, [])
 
-  /** step0 → step1 */
-  const goToStep1 = useCallback(() => {
-    if (lockRef.current) return
-    lockRef.current = true
-    phaseRef.current = 'step1'
-    internalScrollLock.active = true
-    setShowActive(true)
-    setTimeout(() => { lockRef.current = false }, 400)
-  }, [])
+  // ── Lenis 스크롤 감지 ──────────────────────────────────────
+  // lenis.stop() 대신 scrollTo(immediate)로 위치 고정 → 스크롤바 항상 표시
+  // React 자식 effect가 먼저 실행되므로 setTimeout(0)으로 Lenis 초기화 후 구독
+  useEffect(() => {
+    let offFn: (() => void) | undefined
 
-  /** step1 → step0 */
-  const goToStep0 = useCallback(() => {
-    if (lockRef.current) return
-    lockRef.current = true
-    phaseRef.current = 'step0'
-    internalScrollLock.active = false
-    setShowActive(false)
-    setTimeout(() => { lockRef.current = false }, 400)
-  }, [])
+    const timer = setTimeout(() => {
+      const lenis = getLenis()
+      if (!lenis) return
 
-  /** step1 → content */
-  const goToContent = useCallback(() => {
-    phaseRef.current = 'animating'
-    internalScrollLock.active = true
-    setIsContentPhase(true) // section을 min-h-screen으로 확장
-    tlRef.current?.play()
-  }, [])
+      const onLenisScroll = (l: { direction: 1 | -1 | 0 }) => {
+        const phase = phaseRef.current
+        const rect = sectionRef.current?.getBoundingClientRect()
+        if (!rect) return
 
-  /** content → step1 */
-  const goToStep1FromContent = useCallback(() => {
-    phaseRef.current = 'animating'
-    tlRef.current?.reverse()
-    // setIsContentPhase(false)는 onReverseComplete에서 처리
-  }, [])
+        // ▼ 아래로 스크롤: step0/step1에서 섹션 상단 접근 시 스냅
+        if ((phase === 'step0' || phase === 'step1') && l.direction === 1) {
+          if (Math.abs(rect.top) < 1) return  // 이미 섹션 상단 (무한 루프 방지)
+          if (rect.top > -10 && rect.top < 100) {
+            lenis.scrollTo(window.scrollY + rect.top, { immediate: true })
+          }
+          return
+        }
 
+        // ▲ 위로 스크롤: content에서 섹션 상단 도달 시 goToIntro 트리거
+        // wheel 이벤트 없는 Lenis 관성 스크롤도 캐치
+        if (phase === 'content' && l.direction === -1 && Math.abs(rect.top) < 15) {
+          goToIntro()
+          return
+        }
+
+        // ▲ 위로 스크롤: step1에서 drift 방지 (안전장치)
+        if (phase === 'step1' && l.direction === -1 && rect.top < -1 && rect.top > -30) {
+          lenis.scrollTo(window.scrollY + rect.top, { immediate: true })
+        }
+      }
+
+      lenis.on('scroll', onLenisScroll)
+      offFn = () => lenis.off('scroll', onLenisScroll)
+    }, 0)
+
+    return () => {
+      clearTimeout(timer)
+      offFn?.()
+    }
+  }, [goToIntro])
+
+  // ── Wheel (PC) ────────────────────────────────────────────
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      if (snapLock.active) return
-
-      const section = sectionRef.current
-      if (!section) return
-      const rect = section.getBoundingClientRect()
-      if (rect.top > 0 || rect.bottom <= 0) return
-
       const phase = phaseRef.current
+      if (phase === 'animating') {
+        e.preventDefault()
+        e.stopImmediatePropagation()
+        return
+      }
+
+      const rect = sectionRef.current?.getBoundingClientRect()
+      if (!rect) return
+
+      const atSectionTop = Math.abs(rect.top) < 15
       const scrollingDown = e.deltaY > 0
-      const isAtSectionTop = Math.abs(rect.top) < window.innerHeight * 0.05
 
-      if (phase === 'animating' || lockRef.current) {
-        e.preventDefault()
-        e.stopImmediatePropagation()
-        return
-      }
+      if (phase === 'step0' || phase === 'step1') {
+        if (!atSectionTop) return
 
-      // step0 → step1
-      if (phase === 'step0' && scrollingDown) {
-        e.preventDefault()
-        e.stopImmediatePropagation()
-        goToStep1()
-        return
-      }
-
-      // step1 → content
-      if (phase === 'step1' && scrollingDown) {
-        e.preventDefault()
-        e.stopImmediatePropagation()
-        goToContent()
-        return
-      }
-
-      // content + 스크롤 업
-      if (phase === 'content' && !scrollingDown) {
-        e.preventDefault()
-        e.stopImmediatePropagation()
-
-        const section = sectionRef.current!
-        const sectionTopY = section.getBoundingClientRect().top + window.scrollY
-        const atTop = window.scrollY <= sectionTopY + 10
-
-        if (atTop) {
-          // 섹션 최상단 → step1으로 복귀
-          goToStep1FromContent()
+        if (scrollingDown) {
+          // 아래 스크롤: Lenis에 전달하지 않고 단계 전환
+          e.preventDefault()
+          e.stopImmediatePropagation()
+          if (phase === 'step0') goToStep1()
+          else goToContent()
         } else {
-          // 아직 content 내부 → Lenis로 위로 스크롤
-          const lenis = getLenis()
-          const target = Math.max(sectionTopY, window.scrollY - window.innerHeight * 0.7)
-          lenis?.scrollTo(target, { duration: 0.6 })
+          if (phase === 'step1') {
+            e.preventDefault()
+            e.stopImmediatePropagation()
+            goToStep0()
+          }
+          // step0 위로 스크롤: preventDefault 없음 → Lenis가 이벤트 수신 → 이전 섹션으로
         }
-        return
-      }
-
-      // step1 → step0
-      if (phase === 'step1' && !scrollingDown && isAtSectionTop) {
-        e.preventDefault()
-        e.stopImmediatePropagation()
-        goToStep0()
-        return
+      } else if (phase === 'content') {
+        if (!scrollingDown && atSectionTop) {
+          e.preventDefault()
+          e.stopImmediatePropagation()
+          goToIntro()
+        }
       }
     }
 
     window.addEventListener('wheel', handleWheel, { capture: true, passive: false })
     return () => window.removeEventListener('wheel', handleWheel, { capture: true })
-  }, [goToStep0, goToStep1, goToContent, goToStep1FromContent])
+  }, [goToStep0, goToStep1, goToContent, goToIntro])
 
+  // ── Touch (Mobile) ────────────────────────────────────────
+  useEffect(() => {
+    let touchStartY = 0
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const phase = phaseRef.current
+      if (phase === 'animating') {
+        e.preventDefault()
+        return
+      }
+      const rect = sectionRef.current?.getBoundingClientRect()
+      if (!rect) return
+      // step0/step1에서 섹션 상단: 네이티브 모멘텀 스크롤 차단
+      if ((phase === 'step0' || phase === 'step1') && Math.abs(rect.top) < 15) {
+        e.preventDefault()
+      }
+    }
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const phase = phaseRef.current
+      if (phase === 'animating') return
+
+      const rect = sectionRef.current?.getBoundingClientRect()
+      if (!rect) return
+
+      const deltaY      = touchStartY - e.changedTouches[0].clientY
+      const swipedDown  = deltaY > 40
+      const swipedUp    = deltaY < -40
+      const atSectionTop = Math.abs(rect.top) < 15
+
+      if (phase === 'step0' || phase === 'step1') {
+        if (!atSectionTop) return
+        if (swipedDown) {
+          if (phase === 'step0') goToStep1()
+          else goToContent()
+        } else if (swipedUp) {
+          if (phase === 'step1') goToStep0()
+          // step0 위 스와이프: 자연 스크롤 (preventDefault 없음)
+        }
+      } else if (phase === 'content' && swipedUp && atSectionTop) {
+        goToIntro()
+      }
+    }
+
+    window.addEventListener('touchstart', handleTouchStart, { passive: true })
+    window.addEventListener('touchmove',  handleTouchMove,  { passive: false })
+    window.addEventListener('touchend',   handleTouchEnd,   { passive: true })
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart)
+      window.removeEventListener('touchmove',  handleTouchMove)
+      window.removeEventListener('touchend',   handleTouchEnd)
+    }
+  }, [goToStep0, goToStep1, goToContent, goToIntro])
+
+  // ── Tab 클릭 → step1 건너뛰고 바로 content ───────────────
   const handleTabClick = (value: string) => {
+    setActiveTab(value)
     if (phaseRef.current === 'step0') {
       phaseRef.current = 'step1'
-      internalScrollLock.active = true
       setShowActive(true)
     }
-    setActiveTab(value)
-
-    setTimeout(() => {
-      if (phaseRef.current === 'step1') {
-        goToContent()
-      }
-    }, 250)
+    if (phaseRef.current === 'step1') goToContent()
   }
 
   return (
     <section
       ref={sectionRef}
-      data-snap-section
       className={`relative bg-white ${isContentPhase ? 'min-h-screen' : 'h-screen overflow-hidden'}`}
     >
-      {/* 인트로 오버레이: title + tab triggers */}
+      {/* 인트로 오버레이: title + tabs */}
       <div
         ref={introRef}
         className="absolute top-0 left-0 right-0 h-screen z-20 flex flex-col items-center justify-center gap-6 px-8"
