@@ -143,22 +143,24 @@ export function useScrollSnap() {
         return
       }
 
-      // 경계 도달 → 스냅 불필요, 자연 스크롤 허용
-      if (targetIndex === currentIndex) {
-        if (direction > 0) {
-          const sectionBottom = sections[currentIndex].getBoundingClientRect().bottom
-          if (sectionBottom > viewportH + 1) return
-        }
-        return
+      // 아래로 스크롤: 현재 섹션에 더 볼 컨텐츠가 있으면 자연 스크롤 허용
+      // (targetIndex가 다음 섹션이어도 현재 섹션 내부를 먼저 소화해야 함)
+      if (direction > 0) {
+        const sectionBottom = sections[currentIndex].getBoundingClientRect().bottom
+        if (sectionBottom > viewportH + 1) return
       }
 
-      // 높이가 큰 섹션 내부 위로 스크롤 → 자연 스크롤 허용
+      // 경계에서 더 이상 이동 불가 → 자연 스크롤 허용
+      if (targetIndex === currentIndex) return
+
+      // 위로 스크롤: 섹션 상단에 도달하기 전까지 자연 스크롤 허용
+      // iOS 서브픽셀 오차 대비 임계값을 -5로 완화
       if (direction < 0) {
         const sectionTop = sections[currentIndex].getBoundingClientRect().top
-        if (sectionTop < -1) return
+        if (sectionTop < -5) return
       }
 
-      // 스냅 대상 섹션 → 네이티브 스크롤 차단 시작
+      // 스냅 대상 → 네이티브 스크롤 차단 시작
       touchInterceptingRef.current = true
       touchDirectionRef.current = direction
       e.preventDefault()
@@ -167,8 +169,6 @@ export function useScrollSnap() {
     const handleTouchEnd = () => {
       if (!touchInterceptingRef.current) return
       touchInterceptingRef.current = false
-
-      const deltaY = touchStartYRef.current - (window.scrollY) // 이미 저장된 direction 사용
       executeSnap(touchDirectionRef.current)
     }
 
