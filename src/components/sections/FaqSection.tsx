@@ -131,8 +131,8 @@ export default function FaqSection() {
         }
 
         // ▲ 위로 스크롤: content에서 섹션 상단 도달 시 goToIntro 트리거
-        // wheel 이벤트 없는 Lenis 관성 스크롤도 캐치
-        if (phase === 'content' && l.direction === -1 && Math.abs(rect.top) < 15) {
+        // wheel 이벤트 없는 Lenis 관성 스크롤도 캐치 (범위 확장: 빠른 모멘텀 대응)
+        if (phase === 'content' && l.direction === -1 && rect.top > -30 && rect.top < 15) {
           goToIntro()
           return
         }
@@ -215,9 +215,20 @@ export default function FaqSection() {
       }
       const rect = sectionRef.current?.getBoundingClientRect()
       if (!rect) return
-      // step0/step1에서 섹션 상단: 네이티브 모멘텀 스크롤 차단
-      if ((phase === 'step0' || phase === 'step1') && Math.abs(rect.top) < 15) {
-        e.preventDefault()
+      if (Math.abs(rect.top) >= 15) return
+
+      const currentY   = e.touches[0].clientY
+      const movingUp   = currentY < touchStartY  // 손가락 위로 = 페이지 아래로 스크롤
+      const movingDown = currentY > touchStartY  // 손가락 아래로 = 페이지 위로 스크롤
+
+      if (phase === 'step0') {
+        // 페이지 아래 스크롤(손가락 위)만 차단 → 페이지 위 스크롤(손가락 아래)은 허용(이전 섹션)
+        if (movingUp) e.preventDefault()
+      } else if (phase === 'step1') {
+        e.preventDefault()  // 양방향 차단
+      } else if (phase === 'content') {
+        // 페이지 위 스크롤(손가락 아래) 차단 → goToIntro 트리거 보호
+        if (movingDown) e.preventDefault()
       }
     }
 
