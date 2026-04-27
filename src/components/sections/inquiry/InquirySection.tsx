@@ -66,7 +66,7 @@ export default function InquirySection() {
               onChange={handleChange}
               required
               placeholder="이름"
-              className="w-full p-4 rounded-lg bg-white text-sm text-foreground placeholder:text-grayscale-400 outline-none focus:ring-2 focus:ring-primary/40 transition"
+              className="w-full p-4 rounded-lg bg-white text-sm text-foreground placeholder:text-grayscale-400 outline-none focus:ring-2 focus:ring-primary transition"
             />
 
             {/* 휴대폰 */}
@@ -77,7 +77,7 @@ export default function InquirySection() {
               onChange={handleChange}
               required
               placeholder="휴대번호"
-              className="w-full p-4 rounded-lg bg-white text-sm text-foreground placeholder:text-grayscale-400 outline-none focus:ring-2 focus:ring-primary/40 transition"
+              className="w-full p-4 rounded-lg bg-white text-sm text-foreground placeholder:text-grayscale-400 outline-none focus:ring-2 focus:ring-primary transition"
             />
           </div>
 
@@ -89,7 +89,7 @@ export default function InquirySection() {
             onChange={handleChange}
             required
             placeholder="이메일"
-            className="w-full p-4 rounded-lg bg-white text-sm text-foreground placeholder:text-grayscale-400 outline-none focus:ring-2 focus:ring-primary/40 transition"
+            className="w-full p-4 rounded-lg bg-white text-sm text-foreground placeholder:text-grayscale-400 outline-none focus:ring-2 focus:ring-primary transition"
           />
 
           {/* 문의내용 */}
@@ -100,7 +100,7 @@ export default function InquirySection() {
             required
             placeholder="문의 내용 (문의 내용을 토대로 개인화된 상담을 진행해 드릴예정이예요)"
             rows={10}
-            className="w-full p-4 rounded-lg bg-white text-sm text-foreground placeholder:text-grayscale-400 outline-none focus:ring-2 focus:ring-primary/40 transition resize-none"
+            className="w-full p-4 rounded-lg bg-white text-sm text-foreground placeholder:text-grayscale-400 outline-none focus:ring-2 focus:ring-primary transition resize-none"
           />
 
           {/* 개인정보 동의 - 아코디언 */}

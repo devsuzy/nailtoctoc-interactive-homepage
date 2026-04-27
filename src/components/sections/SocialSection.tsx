@@ -68,7 +68,7 @@ export default function SocialSection() {
               className="inline-flex items-center gap-2 rounded-full bg-grayscale-100 px-3 py-2 md:py-3 text-xs font-medium text-foreground hover:bg-grayscale-200 transition-colors md:text-sm md:gap-3"
             >
               <IcoNaverBlog />
-              <span className="flex gap-0.5">네이버 블로그 <IcoArrow /></span>
+              <span className="flex items-center gap-0.5">네이버 블로그 <IcoArrow /></span>
             </Link>
             <Link
               href="https://www.instagram.com/nailtoctoc_official"
@@ -77,7 +77,7 @@ export default function SocialSection() {
               className="inline-flex items-center gap-2 rounded-full bg-grayscale-100 px-3 py-2 md:py-3 text-xs font-medium text-foreground hover:bg-grayscale-200 transition-colors md:text-sm md:gap-3"
             >
               <IcoInstagram />
-              <span className="flex gap-0.5">인스타그램 <IcoArrow /></span>
+              <span className="flex items-center gap-0.5">인스타그램 <IcoArrow /></span>
             </Link>
           </div>
         </div>
